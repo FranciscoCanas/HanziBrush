@@ -28,7 +28,6 @@ public class HanziDraw extends Activity {
 	 * Globals.
 	 */
 	HanziLib hLib;
-	//GestureLibrary gLibrary;
 	GestureOverlayView gOverlayView;
 	TextView gDebugTextView;
 	int numGestures;
@@ -41,17 +40,8 @@ public class HanziDraw extends Activity {
 		gDebugTextView = (TextView) findViewById(R.id.gdebugtextview);
 		gOverlayView = (GestureOverlayView) findViewById(R.id.goverlayview);
 		
-		// Initialize gestures library:
+		// Initialize hanzi library:
 		hLib = new HanziLib();
-		/**
-		gLibrary = GestureLibraries.fromFile(gStoreFile);
-		gLibrary.setSequenceType(GestureStore.SEQUENCE_SENSITIVE);
-		gLibrary.setOrientationStyle(2); // Orientation sensitivity: 1, 2, 4, 8
-		**/
-		
-		// Always call load() after the above settings changes.
-		//gLibrary.load();
-		//numGestures = gLibrary.getGestureEntries().size();
 		numGestures = hLib.getTotalNumber();
 		hLib.setCurrentScene(0);
 		
@@ -90,10 +80,7 @@ public class HanziDraw extends Activity {
 			String debugText;
 			int matches;
 			double topScore=0;
-			Prediction topPred = null;
-			/**
-			ArrayList<Prediction> prediction = gLibrary
-					.recognize(gesture);**/
+			Prediction topPred = null;			
 			
 			if (hLib.classify(gesture) ) {
 				// We have a match:
@@ -102,16 +89,13 @@ public class HanziDraw extends Activity {
 				topScore = topPred.score;
 				
 				hLib.setCurrentScene((hLib.getCurrentScene()+1)%2);
-				
-				debugText = "Current Scene: " + hLib.getCurrentScene() + "\n" + matches + " matches. \n" + 
-						topPred.name + ":" + topScore;
-				
+				debugText = "you drew " + topPred.name;
+					
 			} else {
 				// No match:
-				debugText = "No matches found.";
-				
+				debugText = "No match.";
 			}
-			gDebugTextView.setText(debugText);
+			gDebugTextView.setText(hLib.getMatchesDebugText()+ "\n" + debugText);
 
 		}
 	};// End of OnGesturePerformedListener

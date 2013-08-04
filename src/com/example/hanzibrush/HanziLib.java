@@ -3,13 +3,18 @@ package com.example.hanzibrush;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+
 import android.annotation.SuppressLint;
 import android.gesture.Gesture;
 import android.gesture.GestureLibraries;
 import android.gesture.GestureLibrary;
 import android.gesture.GestureStore;
+import android.gesture.GestureStroke;
 import android.gesture.Prediction;
+import android.graphics.Canvas;
+import android.graphics.Path;
 import android.os.Environment;
+import android.view.View;
 
 /**
  * This class is responsible for keeping all hanzi characters
@@ -24,9 +29,9 @@ public class HanziLib {
 	/**
 	 * Globals.
 	 */
-	private int orientationStyle = GestureStore.ORIENTATION_SENSITIVE;
-	private int sequenceType = GestureStore.SEQUENCE_SENSITIVE;
-	private int minScore = 10;
+	private int orientationStyle = GestureStore.ORIENTATION_INVARIANT;
+	private int sequenceType = GestureStore.SEQUENCE_INVARIANT;
+	private int minScore = 25;
 	private int currentScene;
 	
 	/**
@@ -34,6 +39,8 @@ public class HanziLib {
 	 */
 	private final File gStoreFile = new File(
 			Environment.getExternalStorageDirectory(),"gestures");
+	
+	private final File gStoreEmptyFile = new File(Environment.getExternalStorageDirectory(),"empty_gestures");
 	
 	/**
 	 * The set of Hanzi associated with the current
@@ -84,18 +91,20 @@ public class HanziLib {
 	private GestureLibrary genLibrary(Integer sceneNum) {
 		String [] curHanzi = hanziSceneMap.get(sceneNum);
 		
-		GestureLibrary gLib = GestureLibraries.fromFile(this.gStoreFile);
+		GestureLibrary gLib = GestureLibraries.fromFile(this.gStoreEmptyFile);
 		
-		for (String hanzi : curHanzi) {
-			gLib.addGesture(hanzi, fullSet.getGestures(hanzi).get(0));
-		}
+		
 		
 		gLib.setOrientationStyle(orientationStyle);
 		gLib.setSequenceType(sequenceType);
 		
 		// This throws exceptions, but works.
 		// May want to try simply not loading.
-		//gLib.load();
+		gLib.load();
+		
+		for (String hanzi : curHanzi) {
+			gLib.addGesture(hanzi, fullSet.getGestures(hanzi).get(0));
+		}
 		
 		return gLib;
 	}
@@ -135,5 +144,26 @@ public class HanziLib {
 	public int getCurrentScene() {
 		return currentScene;
 	}
-
+	
+	public String getMatchesDebugText() {
+		String [] currentHanzi = HanziLib.hanziSceneMap.get(currentScene);
+		StringBuilder sb = new StringBuilder();
+		sb.append("current hanzi: |");
+		
+		for (int i=0; i < currentHanzi.length;i++) {
+			sb.append(currentHanzi[i] + " | ");
+		}
+		
+		if (prediction == null) {
+			return sb.toString();
+		}
+		sb.append("\n scores: |");
+		for (int i=0; i < prediction.size(); i++) {
+			sb.append(prediction.get(i).name +
+					":" + prediction.get(i).score + "|");
+		}
+		sb.append("\n");
+		return sb.toString();
+		
+	}
 }
