@@ -26,15 +26,12 @@
         android:layout_height="match_parent"
         android:layout_alignParentTop="true"
         android:eventsInterceptionEnabled="true"
-        android:gestureStrokeType="multiple" 
-        android:fadeDuration="1000"
+        android:gestureStrokeType="multiple"
+        android:fadeDuration="1000" 
         android:fadeEnabled="true"
-        android:fadeOffset="1000"
+        android:fadeOffset="1000" 
         android:gestureColor="#000000"
         android:gestureStrokeWidth="25.0"
-        >
-    </android.gesture.GestureOverlayView>
-
-
+        android:gestureStrokeLengthThreshold="0.1"/>
 </RelativeLayout>
 

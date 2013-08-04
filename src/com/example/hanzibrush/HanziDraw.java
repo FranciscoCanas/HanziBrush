@@ -27,7 +27,8 @@ public class HanziDraw extends Activity {
 	/**
 	 * Globals.
 	 */
-	GestureLibrary gLibrary;
+	HanziLib hLib;
+	//GestureLibrary gLibrary;
 	GestureOverlayView gOverlayView;
 	TextView gDebugTextView;
 	int numGestures;
@@ -41,13 +42,19 @@ public class HanziDraw extends Activity {
 		gOverlayView = (GestureOverlayView) findViewById(R.id.goverlayview);
 		
 		// Initialize gestures library:
+		hLib = new HanziLib();
+		/**
 		gLibrary = GestureLibraries.fromFile(gStoreFile);
-		gLibrary.setSequenceType(GestureStore.SEQUENCE_INVARIANT);
-		gLibrary.setOrientationStyle(GestureStore.ORIENTATION_SENSITIVE);
+		gLibrary.setSequenceType(GestureStore.SEQUENCE_SENSITIVE);
+		gLibrary.setOrientationStyle(2); // Orientation sensitivity: 1, 2, 4, 8
+		**/
 		
 		// Always call load() after the above settings changes.
-		gLibrary.load();
-		numGestures = gLibrary.getGestureEntries().size(); 
+		//gLibrary.load();
+		//numGestures = gLibrary.getGestureEntries().size();
+		numGestures = hLib.getTotalNumber();
+		hLib.setCurrentScene(0);
+		
 		
 		if (numGestures <= 0) {
 			gDebugTextView.setVisibility(View.VISIBLE);
@@ -84,30 +91,28 @@ public class HanziDraw extends Activity {
 			int matches;
 			double topScore=0;
 			Prediction topPred = null;
-			
+			/**
 			ArrayList<Prediction> prediction = gLibrary
-					.recognize(gesture);
+					.recognize(gesture);**/
 			
-			matches = prediction.size();
-			
-			if (matches > 0) { 
-				topPred = prediction.get(0); 
-				topScore = prediction.get(0).score;
+			if (hLib.classify(gesture) ) {
+				// We have a match:
+				matches = hLib.getNumMatches();
+				topPred = hLib.getTopMatch();
+				topScore = topPred.score;
 				
-				if (topScore > 50) {
-					debugText = matches + " matches. \n" + 
-							topPred.name + ":" + topScore;
-				} else {
-					debugText = "Matches found, but unlikely.";
-				}
+				hLib.setCurrentScene((hLib.getCurrentScene()+1)%2);
+				
+				debugText = "Current Scene: " + hLib.getCurrentScene() + "\n" + matches + " matches. \n" + 
+						topPred.name + ":" + topScore;
 				
 			} else {
+				// No match:
 				debugText = "No matches found.";
+				
 			}
-
 			gDebugTextView.setText(debugText);
-		}
-		
-	};// End of OnGesturePerformedListener
 
+		}
+	};// End of OnGesturePerformedListener
 }
